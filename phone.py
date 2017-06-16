@@ -6,13 +6,14 @@ from kivy.uix.button import Button #a label to show information
 from plyer import accelerometer #object to read the accelerometer
 from kivy.clock import Clock #clock to schedule a method
 import sys
+import socket
 
 class UI(FloatLayout):#the app ui
 	tekst = ""
 	clic = 0
 	def __init__(self, **kwargs):
 		super(UI, self).__init__(**kwargs)
-		layout = GridLayout(cols=1,rows=3, row_force_default=True, row_default_height=50)
+		layout = GridLayout(cols=1,rows=3, row_force_default=True, row_default_height=300)
 		self.lblAcce = Label(text="Accelerometer: ",width=100,height=20) #create a label at the center
 		self.btn = Button(text="Zapisz", width=50,height=50)
 		self.btn.bind(on_press=self.save)
@@ -54,7 +55,7 @@ class UI(FloatLayout):#the app ui
 		except:
 			txt = "Cannot read accelerometer!" #error
 		try:
-			self.tekst = self.tekst + "X = %.2f	Y = %.2f	Z = %2.f\n"%(
+			self.tekst = self.tekst + "%.2f	%.2f	%2.f\n"%(		#x,y,z from accelerometer
 			accelerometer.acceleration[0], #read the X value
 			accelerometer.acceleration[1], # Y
 			accelerometer.acceleration[2]) # Z
