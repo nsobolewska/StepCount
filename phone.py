@@ -33,4 +33,7 @@ class Accelerometer(App): #our app
 		return ui #show it
 
 if __name__ == '__main__':
+	file2write = open("filename.txt", 'w')
+	file2write.write("here goes the data")
+	file2write.close()
 	Accelerometer().run() #start our app
