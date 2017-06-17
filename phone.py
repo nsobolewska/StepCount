@@ -11,6 +11,11 @@ import socket
 class UI(FloatLayout):#the app ui
 	tekst = ""
 	clic = 0
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	TCP_IP = '192.168.8.100'
+	TCP_PORT = 5005
+	BUFFER_SIZE = 1024
+	MESSAGE = "Hello, World!"
 	def __init__(self, **kwargs):
 		super(UI, self).__init__(**kwargs)
 		layout = GridLayout(cols=1,rows=3, row_force_default=True, row_default_height=300)
@@ -29,9 +34,12 @@ class UI(FloatLayout):#the app ui
 		sys.exit()
 
 	def save(self,instance):
-		file2write = open("filename.txt", 'w')
-		print("To jest tekst",self.tekst)
-		self.tekst = self.tekst+"Koniec"
+		file2write = open("akcelerometr.txt", 'w')
+		# print("To jest tekst",self.tekst)
+		self.sock.connect((self.TCP_IP, self.TCP_PORT))
+		self.sock.send(self.tekst)
+		data = self.sock.recv(self.BUFFER_SIZE)
+		self.sock.close()
 		file2write.write(self.tekst)
 		file2write.close()
 
