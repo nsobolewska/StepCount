@@ -4,22 +4,21 @@ from kivy.uix.floatlayout import FloatLayout #the UI layout
 from kivy.uix.label import Label #a label to show information
 from kivy.uix.button import Button #a label to show information
 from plyer import accelerometer #object to read the accelerometer
+from plyer import gps
 from kivy.clock import Clock #clock to schedule a method
+import time
 import sys
 import socket
 
 class UI(FloatLayout):#the app ui
 	tekst = ""
+	tekst2 = ""
 	clic = 0
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	TCP_IP = '192.168.8.100'
-	TCP_PORT = 5005
-	BUFFER_SIZE = 1024
-	MESSAGE = "Hello, World!"
 	def __init__(self, **kwargs):
 		super(UI, self).__init__(**kwargs)
-		layout = GridLayout(cols=1,rows=3, row_force_default=True, row_default_height=300)
+		layout = GridLayout(cols=1,rows=4, row_force_default=True, row_default_height=300)
 		self.lblAcce = Label(text="Accelerometer: ",width=100,height=20) #create a label at the center
+		self.lblAcce2 = Label(text="Gps: ",width=100,height=20) #create a label at the center
 		self.btn = Button(text="Zapisz", width=50,height=50)
 		self.btn.bind(on_press=self.save)
 		self.btn2 = Button(text="Zakoncz", width=50,height=50)
@@ -27,30 +26,45 @@ class UI(FloatLayout):#the app ui
 		layout.add_widget(self.btn)
 		layout.add_widget(self.btn2)
 		layout.add_widget(self.lblAcce)
+		layout.add_widget(self.lblAcce2)
 		self.add_widget(layout)
+		gps.configure(on_location=self.print_locations)
 		self.tryos()
 
 	def koncz(self,value):
 		sys.exit()
 
+	def print_locations(self,**kwargs):
+		self.tekst2 = self.tekst2+ 'lat: {lat}, lon: {lon}'.format(**kwargs)
+
 	def save(self,instance):
-		tab = []
+		#--------------ZAPISZ DO PLIKU--------------------#
 		file2write = open("akcelerometr.txt", 'w')
-		self.tekst = self.tekst + "Koniec"
-		# print("To jest tekst",self.tekst)
-		self.sock.connect((self.TCP_IP, self.TCP_PORT))
-		# for ch in self.tekst:
-		# 	tab.append(bin(ord(ch)))
-		self.sock.send(str.encode(self.tekst))
-		data = self.sock.recv(self.BUFFER_SIZE)
-		self.sock.close()
 		file2write.write(self.tekst)
 		file2write.close()
+		file2write2 = open("gps.txt", 'w')
+		file2write2.write(self.tekst2)
+		file2write2.close()
+		#-------------------------------------------------#
+		# #-------------------------------------------------#
+		# #-----------SOCKET--------------------------------#
+		# host = "192.168.8.100"
+		# port = 5005
+		# self.s = socket.socket()
+		# self.s.connect((host, port))
+		# self.tekst = "Koniec" #self.tekst +
+		# encoded_msg = bytes(self.tekst, "utf-8")
+		# self.s.send(encoded_msg)
+		# #-------------------------------------------------#
+		# for line in self.tekst:
+		# 	self.sock.send(str.encode(line))
+		# 	time.sleep(1/20)
 
 	def tryos(self):
 		if self.clic == 0:
 			try:
 				accelerometer.enable() #enable the accelerometer
+				gps.start()
 				#if you want do disable it, just run: accelerometer.disable()
 				Clock.schedule_interval(self.update, 1.0/24) #24 calls per second
 			except:
