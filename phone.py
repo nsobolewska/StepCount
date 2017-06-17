@@ -34,10 +34,14 @@ class UI(FloatLayout):#the app ui
 		sys.exit()
 
 	def save(self,instance):
+		tab = []
 		file2write = open("akcelerometr.txt", 'w')
+		self.tekst = self.tekst + "Koniec"
 		# print("To jest tekst",self.tekst)
 		self.sock.connect((self.TCP_IP, self.TCP_PORT))
-		self.sock.send(self.tekst)
+		# for ch in self.tekst:
+		# 	tab.append(bin(ord(ch)))
+		self.sock.send(str.encode(self.tekst))
 		data = self.sock.recv(self.BUFFER_SIZE)
 		self.sock.close()
 		file2write.write(self.tekst)
