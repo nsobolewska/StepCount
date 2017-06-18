@@ -17,15 +17,15 @@ class UI(FloatLayout):#the app ui
 	names = 0
 	nameOfFileA = "akcelerometr.txt"
 	nameOfFileG = "gps.txt"
-	# file2write = open(nameOfFileA, 'w')
-	# file2write.write(tekst)
-	# file2write.close()
-	# file2write2 = open(nameOfFileG, 'w')
-	# file2write2.write(tekst2)
-	# file2write2.close()
+	file2write = open(nameOfFileA, 'w')
+	file2write.write(tekst)
+	file2write.close()
+	file2write2 = open(nameOfFileG, 'w')
+	file2write2.write(tekst2)
+	file2write2.close()
 	def __init__(self, **kwargs):
 		super(UI, self).__init__(**kwargs)
-		layout = GridLayout(cols=1,rows=6, row_force_default=True, row_default_height=50)
+		layout = GridLayout(cols=1,rows=6, row_force_default=True, row_default_height=200)
 		self.lblAcce = Label(text="Accelerometer: ",width=100,height=20) #create a label at the center
 		self.btn = Button(text="Zapisz", width=50,height=50)
 		self.btn.bind(on_press=self.save)
