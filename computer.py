@@ -126,7 +126,7 @@ class Window(QMainWindow):
         for i in pks[0]:
             jedno = 1
             for j in pks2[0]:
-                if magNoG[i]>2.6 and magNoG[i]-magNoG[j]>4 and (j-i)<3 and jedno ==1 and magNoG[i]-magNoG[j]<15 and abs(Z[i]-magNoG[i])<4:
+                if magNoG[i]>2.6 and magNoG[i]-magNoG[j]>4 and magNoG[i]-magNoG[j]<15 and (j-i)<3 and jedno ==1 and magNoG[i]-magNoG[j]<15 and abs(Z[i]-magNoG[i])<4:
                     print("max,min: ",magNoG[i],magNoG[j])
                     if i-ii>5:
                         kroki += 1
