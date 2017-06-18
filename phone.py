@@ -15,6 +15,14 @@ class UI(FloatLayout):#the app ui
 	tekst2 = ""
 	clic = 0
 	names = 0
+	nameOfFileA = "akcelerometr.txt"
+	nameOfFileG = "gps.txt"
+	file2write = open(nameOfFileA, 'w')
+	file2write.write(tekst)
+	file2write.close()
+	file2write2 = open(nameOfFileG, 'w')
+	file2write2.write(tekst2)
+	file2write2.close()
 	def __init__(self, **kwargs):
 		super(UI, self).__init__(**kwargs)
 		layout = GridLayout(cols=1,rows=5, row_force_default=True, row_default_height=200)
@@ -49,21 +57,20 @@ class UI(FloatLayout):#the app ui
 		sys.exit()
 
 	def print_locations(self,**kwargs):
-		self.tekst2 = self.tekst2+ '{lat} {lon}'.format(**kwargs) #latitude longitude
+		self.tekst2 = self.tekst2+ '{lat}	{lon}	'.format(**kwargs) #latitude longitude
 
 	def save(self,instance):
 		#--------------ZAPISZ DO PLIKU--------------------#
-		nameOfFileA = "akcelerometr%.0f.txt"%self.names
-		nameOfFileG = "gps%.0f.txt" % self.names
-		file2write = open(nameOfFileA, 'w')
+		nameOfFileA = "akcelerometr.txt"
+		nameOfFileG = "gps.txt"
+		file2write = open(nameOfFileA, 'a')
 		file2write.write(self.tekst)
 		file2write.close()
-		file2write2 = open(nameOfFileG, 'w')
+		file2write2 = open(nameOfFileG, 'a')
 		file2write2.write(self.tekst2)
 		file2write2.close()
 		self.tekst = ""
 		self.tekst2 = ""
-		self.names+=1
 		#-------------------------------------------------#
 		# #-------------------------------------------------#
 		# #-----------SOCKET--------------------------------#
