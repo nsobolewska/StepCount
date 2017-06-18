@@ -6,27 +6,26 @@ from scipy import signal
 import time
 import sys
 from PyQt5.QtWidgets import *
-# QMainWindow, QPushButton, QApplication, QAction
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import pyqtSlot, Qt
+import _thread
 
 class Window(QMainWindow):
     tekst = ""
     nameOfFileA = "akcelerometr1.txt"
     nameOfFileG = "gps1.txt"
-    file2write = open(nameOfFileA, 'w')
-    file2write.write(tekst)
-    file2write.close()
-    file2write2 = open(nameOfFileG, 'w')
-    file2write2.write(tekst)
-    file2write2.close()
+    # file2write = open(nameOfFileA, 'w')
+    # file2write.write(tekst)
+    # file2write.close()
+    # file2write2 = open(nameOfFileG, 'w')
+    # file2write2.write(tekst)
+    # file2write2.close()
     def __init__(self):
         super(Window, self).__init__()
         self.setGeometry(150, 150, 500, 500)
         self.okno = QWidget(self)
         self.setCentralWidget(self.okno)
         self.mainLayout = QVBoxLayout()
-        # self.mainLayout.setGeometry(100,100,300,300)
         self.gridLayout = QGridLayout()
         self.okno.setLayout(self.mainLayout)
         self.setWindowTitle("Movemeter")
@@ -38,7 +37,12 @@ class Window(QMainWindow):
         self.resultlabel = QLabel("Liczba krokow: ", self)
         self.resultlabel.setFont(QtGui.QFont('SansSerif', 15))
         self.resultlabel.resize(self.resultlabel.minimumSizeHint())
-        self.mainLayout.addWidget(self.resultlabel)
+        self.gridLayout.addWidget(self.resultlabel, 0, 0)
+
+        self.resultlabel2 = QLabel("0", self)
+        self.resultlabel2.setFont(QtGui.QFont('SansSerif', 15))
+        self.resultlabel2.resize(self.resultlabel2.minimumSizeHint())
+        self.gridLayout.addWidget(self.resultlabel2, 0, 1)
 
         self.btn0 = QPushButton('Licz kroki i wykresl wykresy', self)
         self.btn0.clicked.connect(self.akcelerometr)
@@ -51,7 +55,7 @@ class Window(QMainWindow):
         self.gridLayout.addWidget(self.btn1, 1, 1)
 
         self.btn2 = QPushButton('Wlacz serwer', self)
-        self.btn2.clicked.connect(self.on_click2)
+        self.btn2.clicked.connect(self.server)
         self.btn2.resize(self.btn2.minimumSizeHint())
         self.gridLayout.addWidget(self.btn2, 2, 0)
 
@@ -68,12 +72,16 @@ class Window(QMainWindow):
 
     def on_click2(self):
         print("Wlaczanie serwera")
+        try:
+            _thread.start_new_thread(self.server)
+        except:
+            print("nie mozna utworzyc watkow")
 
     def on_click3(self):
-        print("Wylaczanie serwera")
+        self.s.shutdown()
 
     def akcelerometr(self):
-        with open("akcelerometr.txt", "r") as ins:
+        with open("akcelerometr1.txt", "r") as ins:
             akc = []
             for line in ins:
                 for word in line.split():
@@ -101,34 +109,36 @@ class Window(QMainWindow):
 
         magNoG = mag - np.mean(mag)
 
-        minPeakHeight = np.std(magNoG)
+        # minPeakHeight = np.std(magNoG)
 
-        maxPeakHeight = minPeakHeight + 1
+        # maxPeakHeight = minPeakHeight + 1
+        pks = signal.argrelextrema(magNoG, np.greater)
+        magNoG2 = []
+        magNoG1 = []
+        for i in pks[0]:
+            magNoG1.append(magNoG[i])
+        pks2 = signal.argrelextrema(magNoG, np.less)
 
-        pks = signal.find_peaks_cwt(magNoG,np.arange(1,6))
-        # pks = signal.argrelextrema(magNoG, np.greater)
-        magNoG2 = 1/magNoG
-        pks2 = signal.find_peaks_cwt(magNoG2,np.arange(1,6))
-
-
-        minPeakHeight2 = np.std(Z)
-        print(minPeakHeight2)
+        for i in pks2[0]:
+            magNoG2.append(magNoG[i])
         kroki = 0
-        kroki2 = 0
-        # print(magNoG(pks))
-        for loc in pks:
-        #     if magNoG[loc]>minPeakHeight and Z[loc]>minPeakHeight2 and magNoG[loc]<maxPeakHeight :
-            kroki+=1
-        for loc in pks:
-        #     if magNoG[loc]>minPeakHeight and Z[loc]>minPeakHeight2 and magNoG[loc]<maxPeakHeight :
-            kroki2+=1
-
+        ii = 0
+        for i in pks[0]:
+            jedno = 1
+            for j in pks2[0]:
+                if magNoG[i]>2.6 and magNoG[i]-magNoG[j]>4 and (j-i)<3 and jedno ==1 and magNoG[i]-magNoG[j]<15 and abs(Z[i]-magNoG[i])<4:
+                    print("max,min: ",magNoG[i],magNoG[j])
+                    if i-ii>5:
+                        kroki += 1
+                        jedno = 0
+                    ii = i
         print("Ilosc krokow",kroki)
-        print("Ilosc krokow",kroki2)
-        mpl.plot(time,akcX,'r')
-        mpl.plot(time, akcY, 'g')
-        mpl.plot(time, akcZ, 'b')
+        self.resultlabel2.setText((str)(kroki))
+        # mpl.plot(time,akcX,'r')
+        # mpl.plot(time, akcY, 'g')
+        mpl.plot(time, Z, 'b')
         mpl.plot(time, magNoG, 'y')
+        mpl.legend(["Z","amplituda bez grawitacji"])
 
         mpl.show()
 
@@ -173,11 +183,11 @@ class Window(QMainWindow):
         nameOfFileG = "gps1.txt"
         host = "192.168.8.100"
         port = 3000
-        s = socket.socket()
-        s.bind((host, port))
-        s.listen(10)
+        self.s = socket.socket()
+        self.s.bind((host, port))
+        self.s.listen(10)
         while True:
-                c, addr=s.accept()
+                c, addr=self.s.accept()
                 print("\nconnection successful with "+str(addr)+"\n\n")
                 data = c.recv(1024)
                 while data:
